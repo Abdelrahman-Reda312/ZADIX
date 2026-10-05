@@ -11,17 +11,22 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="loading">
 
 <div class="preloader" aria-hidden="true">
   <div class="loader-inner">
-    <div class="loader-emblem">
-      <svg class="loader-ring" viewBox="0 0 200 200"><circle cx="100" cy="100" r="94"/><circle class="dash" cx="100" cy="100" r="84"/></svg>
-      <img src="assets/images/zadix-emblem-gold.png" alt="">
-    </div>
+    <svg class="helm" viewBox="0 0 100 100">
+      <circle cx="50" cy="50" r="30" stroke-width="2"/>
+      <circle cx="50" cy="50" r="8" stroke-width="2"/>
+      <line x1="50" y1="4" x2="50" y2="96" stroke-width="2"/>
+      <line x1="4" y1="50" x2="96" y2="50" stroke-width="2"/>
+      <line x1="17.5" y1="17.5" x2="82.5" y2="82.5" stroke-width="2"/>
+      <line x1="82.5" y1="17.5" x2="17.5" y2="82.5" stroke-width="2"/>
+    </svg>
     <div class="loader-brand">ZADIX</div>
     <div class="loader-sub">Innovate Ship Supply Goods</div>
     <div class="loader-bar"><span></span></div>
@@ -34,7 +39,7 @@
 <header class="header">
   <div class="container nav">
     <a href="index.html" class="logo" aria-label="Zadix home">
-      <img class="logo-emblem" src="assets/images/zadix-emblem-gold.png" alt="">
+      <img class="logo-emblem" src="assets/images/zadix-emblem-sm.webp" width="63" height="54" alt="">
       <div class="logo-text"><strong>ZADIX</strong><small>Innovate Ship Supply Goods</small></div>
     </a>
     <nav class="menu">
@@ -50,7 +55,7 @@
 </header>
 
 <section class="hero page-hero">
-  <video class="hero-video" src="assets/videos/cargo.mp4" poster="assets/images/cargo-ships.jpg" autoplay muted loop playsinline></video>
+  <video class="hero-video" preload="auto" src="assets/videos/cargo.mp4" poster="assets/images/cargo-ships.webp" autoplay muted loop playsinline></video>
   <div class="container">
     <div class="hero-content">
       <span class="eyebrow fade-up d1">About Zadix</span>
@@ -84,7 +89,7 @@
     </div>
     <div class="reveal right">
       <div class="frame">
-        <div class="img-wrap"><video src="assets/videos/terminal.mp4" poster="assets/images/port-cranes.jpg" autoplay muted loop playsinline></video></div>
+        <div class="img-wrap"><video preload="none" data-src="assets/videos/terminal.mp4" poster="assets/images/port-cranes.webp" autoplay muted loop playsinline></video></div>
         <div class="badge"><strong>5</strong><span>Countries in our supply network</span></div>
       </div>
     </div>
@@ -122,7 +127,7 @@
 </section>
 
 <section class="band">
-  <video class="band-video" src="assets/videos/ocean-ship.mp4" poster="assets/images/container-ship.jpg" autoplay muted loop playsinline></video>
+  <video class="band-video" preload="none" data-src="assets/videos/ocean-ship.mp4" poster="assets/images/container-ship.webp" autoplay muted loop playsinline></video>
   <div class="container reveal">
     <span class="eyebrow">Our people</span>
     <h2>A team that thinks like <span class="gold-text">your crew.</span></h2>
@@ -145,7 +150,7 @@
     </div>
     <div class="reveal left">
       <div class="frame">
-        <div class="img-wrap"><img src="assets/images/warehouse.jpg" alt="Warehouse with packed pallets ready for delivery" loading="lazy"></div>
+        <div class="img-wrap"><img src="assets/images/warehouse.webp" alt="Warehouse with packed pallets ready for delivery" loading="lazy" decoding="async"></div>
         <div class="badge"><strong>24/7</strong><span>Operations &amp; delivery desk</span></div>
       </div>
     </div>
@@ -155,7 +160,7 @@
 <section class="section">
   <div class="container">
     <div class="cta reveal zoom">
-      <img src="assets/images/cargo-ships.jpg" alt="" loading="lazy">
+      <img src="assets/images/cargo-ships.webp" alt="" loading="lazy" decoding="async">
       <div>
         <span class="eyebrow">Your vessel is on its way</span>
         <h2>Let your next port call be <span class="gold-text">effortless.</span></h2>
@@ -172,7 +177,7 @@
   <div class="container">
     <div class="footer-grid">
       <div>
-        <a href="index.html" class="footer-logo"><img src="assets/images/zadix-logo-gold.png" alt="Zadix Maritime"></a>
+        <a href="index.html" class="footer-logo"><img src="assets/images/zadix-logo-sm.webp" width="190" height="203" loading="lazy" decoding="async" alt="Zadix Maritime"></a>
         <p>A trusted ship supply partner across every Egyptian port and the Suez Canal, extending to Greece, Bulgaria, Romania and Turkey through our network of trusted partners.</p>
         <div class="socials">
           <a href="#" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
@@ -206,19 +211,20 @@
         <ul>
           <li><i class="fa-solid fa-location-dot" style="color:var(--gold);margin-right:10px"></i>Head Office, Egypt</li>
           <li><a href="tel:+201000000000"><i class="fa-solid fa-phone" style="color:var(--gold);margin-right:10px"></i>+20 100 000 0000</a></li>
-          <li><a href="mailto:info@zadixservices.com"><i class="fa-solid fa-envelope" style="color:var(--gold);margin-right:10px"></i>info@zadixservices.com</a></li>
+          <li><a href="mailto:zadix1maritime@gmail.com"><i class="fa-solid fa-envelope" style="color:var(--gold);margin-right:10px"></i>zadix1maritime@gmail.com</a></li>
           <li><i class="fa-solid fa-clock" style="color:var(--gold);margin-right:10px"></i>24 / 7 &middot; 365 days</li>
         </ul>
       </div>
     </div>
     <div class="footer-bottom">
-      <span>&copy; <span class="year"></span> Zadix Services. All rights reserved.</span>
+      <span>&copy; 2026 piXel. All rights reserved.</span>
       <span>Egypt &middot; Suez Canal &middot; Greece &middot; Bulgaria &middot; Romania &middot; Turkey</span>
     </div>
   </div>
 </footer>
 
 <button class="to-top" aria-label="Back to top"><i class="fa-solid fa-anchor"></i></button>
-<script src="js/main.js"></script>
+<script src="js/main.js" defer></script>
+<script type="module" src="js/live.js"></script>
 </body>
 </html>

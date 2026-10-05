@@ -11,17 +11,22 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="loading">
 
 <div class="preloader" aria-hidden="true">
   <div class="loader-inner">
-    <div class="loader-emblem">
-      <svg class="loader-ring" viewBox="0 0 200 200"><circle cx="100" cy="100" r="94"/><circle class="dash" cx="100" cy="100" r="84"/></svg>
-      <img src="assets/images/zadix-emblem-gold.png" alt="">
-    </div>
+    <svg class="helm" viewBox="0 0 100 100">
+      <circle cx="50" cy="50" r="30" stroke-width="2"/>
+      <circle cx="50" cy="50" r="8" stroke-width="2"/>
+      <line x1="50" y1="4" x2="50" y2="96" stroke-width="2"/>
+      <line x1="4" y1="50" x2="96" y2="50" stroke-width="2"/>
+      <line x1="17.5" y1="17.5" x2="82.5" y2="82.5" stroke-width="2"/>
+      <line x1="82.5" y1="17.5" x2="17.5" y2="82.5" stroke-width="2"/>
+    </svg>
     <div class="loader-brand">ZADIX</div>
     <div class="loader-sub">Innovate Ship Supply Goods</div>
     <div class="loader-bar"><span></span></div>
@@ -34,7 +39,7 @@
 <header class="header">
   <div class="container nav">
     <a href="index.html" class="logo" aria-label="Zadix home">
-      <img class="logo-emblem" src="assets/images/zadix-emblem-gold.png" alt="">
+      <img class="logo-emblem" src="assets/images/zadix-emblem-sm.webp" width="63" height="54" alt="">
       <div class="logo-text"><strong>ZADIX</strong><small>Innovate Ship Supply Goods</small></div>
     </a>
     <nav class="menu">
@@ -50,7 +55,7 @@
 </header>
 
 <section class="hero">
-  <video class="hero-video" src="assets/videos/hero.mp4" poster="assets/images/cargo-ships.jpg" autoplay muted loop playsinline></video>
+  <video class="hero-video" preload="auto" src="assets/videos/hero.mp4" poster="assets/images/cargo-ships.webp" autoplay muted loop playsinline></video>
   <div class="container">
     <div class="hero-content">
       <span class="eyebrow fade-up d1">Ship Supply &middot; Egypt &amp; Suez Canal</span>
@@ -94,7 +99,7 @@
   <div class="container split">
     <div class="reveal left">
       <div class="frame">
-        <div class="img-wrap"><img src="assets/images/container-ship.jpg" alt="Container ship berthed beneath gantry cranes" loading="lazy"></div>
+        <div class="img-wrap"><img src="assets/images/container-ship.webp" alt="Container ship berthed beneath gantry cranes" loading="lazy" decoding="async"></div>
         <div class="badge"><strong>13</strong><span>Egyptian ports &amp; the Suez Canal covered</span></div>
       </div>
     </div>
@@ -121,19 +126,19 @@
     </div>
     <div class="rings">
       <div class="ring-card reveal" data-delay="0">
-        <div class="ring" data-segments="13"><div class="ring-center"><span class="num" data-count="13">0</span></div></div>
+        <div class="ring" data-segments="13" data-stat="ports"><div class="ring-center"><span class="num" data-count="13">0</span></div></div>
         <h4>Egyptian Ports</h4><p>Every port on the Mediterranean, the Canal and the Red Sea</p>
       </div>
       <div class="ring-card reveal" data-delay="120">
-        <div class="ring" data-segments="5"><div class="ring-center"><span class="num" data-count="5">0</span></div></div>
+        <div class="ring" data-segments="5" data-stat="countries"><div class="ring-center"><span class="num" data-count="5">0</span></div></div>
         <h4>Countries</h4><p>Egypt, Greece, Bulgaria, Romania and Turkey</p>
       </div>
       <div class="ring-card reveal" data-delay="240">
-        <div class="ring" data-segments="24"><div class="ring-center"><span class="num" data-count="24" data-suffix="/7">0</span></div></div>
+        <div class="ring" data-segments="24" data-stat="hours"><div class="ring-center"><span class="num" data-count="24" data-suffix="/7">0</span></div></div>
         <h4>Hours a Day</h4><p>An operations desk that never closes</p>
       </div>
       <div class="ring-card reveal" data-delay="360">
-        <div class="ring" data-segments="12"><div class="ring-center"><span class="num" data-count="365">0</span></div></div>
+        <div class="ring" data-segments="12" data-stat="days"><div class="ring-center"><span class="num" data-count="365">0</span></div></div>
         <h4>Days a Year</h4><p>Holidays and weekends included — ships don't wait</p>
       </div>
     </div>
@@ -143,24 +148,24 @@
         <svg class="donut" viewBox="0 0 200 200" role="img" aria-label="13 Egyptian ports by region: Mediterranean 3, Suez Canal and Gulf 5, Red Sea 5">
           <circle class="donut-track" cx="100" cy="100" r="80"/>
         </svg>
-        <div class="donut-center"><span>13</span><small>Ports covered</small></div>
+        <div class="donut-center"><span class="donut-total">13</span><small>Ports covered</small></div>
         <div class="chart-tip" role="status"></div>
       </div>
       <div class="breakdown">
         <span class="eyebrow">Coverage by region</span>
         <h3>Three coastlines, <span class="gold-text">one partner.</span></h3>
         <ul class="bars">
-          <li data-region="Mediterranean Coast" data-value="3" data-color="#3d8ee0">
+          <li data-key="med" data-region="Mediterranean Coast" data-value="3" data-color="#3d8ee0">
             <div class="bar-head"><span class="sw" style="background:#3d8ee0"></span><b>Mediterranean Coast</b><em>3 ports</em></div>
             <div class="bar-track"><span class="bar-fill" style="background:#3d8ee0"></span></div>
             <small>Alexandria &middot; Damietta &middot; Port Said</small>
           </li>
-          <li data-region="Suez Canal &amp; Gulf" data-value="5" data-color="#ad883e">
+          <li data-key="canal" data-region="Suez Canal &amp; Gulf" data-value="5" data-color="#ad883e">
             <div class="bar-head"><span class="sw" style="background:#ad883e"></span><b>Suez Canal &amp; Gulf</b><em>5 locations</em></div>
             <div class="bar-track"><span class="bar-fill" style="background:#ad883e"></span></div>
             <small>Suez Canal &middot; Suez &middot; Oil Berth &middot; Adabiya &middot; Sokhna</small>
           </li>
-          <li data-region="Red Sea Coast" data-value="5" data-color="#c9665a">
+          <li data-key="red" data-region="Red Sea Coast" data-value="5" data-color="#c9665a">
             <div class="bar-head"><span class="sw" style="background:#c9665a"></span><b>Red Sea Coast</b><em>5 ports</em></div>
             <div class="bar-track"><span class="bar-fill" style="background:#c9665a"></span></div>
             <small>Ras Gharib &middot; Hurghada &middot; Safaga &middot; Abu Tartur &middot; Hamrawein</small>
@@ -180,7 +185,7 @@
     </div>
     <div class="cards">
       <article class="card reveal" data-delay="0">
-        <img src="assets/images/vegetables-2.jpg" alt="Fresh provisions" loading="lazy">
+        <img src="assets/images/vegetables-2.webp" alt="Fresh provisions" loading="lazy" decoding="async">
         <span class="idx">01</span>
         <div class="icon"><i class="fa-solid fa-utensils"></i></div>
         <h3>Fresh &amp; Dry Provisions</h3>
@@ -188,7 +193,7 @@
         <a href="services.html" class="more">Explore <i class="fa-solid fa-arrow-right"></i></a>
       </article>
       <article class="card reveal" data-delay="150">
-        <img src="assets/images/ropes.jpg" alt="Mooring ropes on deck" loading="lazy">
+        <img src="assets/images/ropes.webp" alt="Mooring ropes on deck" loading="lazy" decoding="async">
         <span class="idx">02</span>
         <div class="icon"><i class="fa-solid fa-anchor"></i></div>
         <h3>Deck &amp; Engine Stores</h3>
@@ -196,7 +201,7 @@
         <a href="services.html" class="more">Explore <i class="fa-solid fa-arrow-right"></i></a>
       </article>
       <article class="card reveal" data-delay="300">
-        <img src="assets/images/life-buoy.jpg" alt="Life buoy on a ship's rail" loading="lazy">
+        <img src="assets/images/life-buoy.webp" alt="Life buoy on a ship's rail" loading="lazy" decoding="async">
         <span class="idx">03</span>
         <div class="icon"><i class="fa-solid fa-life-ring"></i></div>
         <h3>Safety &amp; Cabin Stores</h3>
@@ -208,7 +213,7 @@
 </section>
 
 <section class="band">
-  <video class="band-video" src="assets/videos/sailing.mp4" poster="assets/images/tanker.jpg" autoplay muted loop playsinline></video>
+  <video class="band-video" preload="none" data-src="assets/videos/sailing.mp4" poster="assets/images/tanker.webp" autoplay muted loop playsinline></video>
   <div class="container reveal">
     <div class="play-ring"><i class="fa-solid fa-ship"></i></div>
     <span class="eyebrow">From the Mediterranean to the Red Sea</span>
@@ -240,12 +245,22 @@
       <h2>Life on the <span class="gold-text">waterline.</span></h2>
     </div>
     <div class="gallery">
-      <figure class="g tall reveal zoom"><img src="assets/images/container-stack.jpg" alt="Stacked shipping containers" loading="lazy"><figcaption><small>Containers</small><span>Built to carry the world</span></figcaption></figure>
-      <figure class="g wide reveal zoom" data-delay="100"><img src="assets/images/port-2.jpg" alt="Busy container port from above" loading="lazy"><figcaption><small>Ports</small><span>Where every voyage meets the shore</span></figcaption></figure>
-      <figure class="g reveal zoom" data-delay="200"><img src="assets/images/tanker.jpg" alt="Deck of a tanker" loading="lazy"><figcaption><small>Tankers</small><span>Oil berth supply</span></figcaption></figure>
-      <figure class="g reveal zoom" data-delay="100"><img src="assets/images/ship-night.jpg" alt="Ship moored at night" loading="lazy"><figcaption><small>Night calls</small><span>24/7 deliveries</span></figcaption></figure>
-      <figure class="g wide reveal zoom" data-delay="200"><img src="assets/images/containers-port.jpg" alt="Containers waiting at the terminal" loading="lazy"><figcaption><small>Logistics</small><span>Cargo in motion</span></figcaption></figure>
+      <figure class="g tall reveal zoom"><img src="assets/images/container-stack.webp" alt="Stacked shipping containers" loading="lazy" decoding="async"><figcaption><small>Containers</small><span>Built to carry the world</span></figcaption></figure>
+      <figure class="g wide reveal zoom" data-delay="100"><img src="assets/images/port-2.webp" alt="Busy container port from above" loading="lazy" decoding="async"><figcaption><small>Ports</small><span>Where every voyage meets the shore</span></figcaption></figure>
+      <figure class="g reveal zoom" data-delay="200"><img src="assets/images/tanker.webp" alt="Deck of a tanker" loading="lazy" decoding="async"><figcaption><small>Tankers</small><span>Oil berth supply</span></figcaption></figure>
+      <figure class="g reveal zoom" data-delay="100"><img src="assets/images/ship-night.webp" alt="Ship moored at night" loading="lazy" decoding="async"><figcaption><small>Night calls</small><span>24/7 deliveries</span></figcaption></figure>
+      <figure class="g wide reveal zoom" data-delay="200"><img src="assets/images/containers-port.webp" alt="Containers waiting at the terminal" loading="lazy" decoding="async"><figcaption><small>Logistics</small><span>Cargo in motion</span></figcaption></figure>
     </div>
+  </div>
+</section>
+
+<section class="section" id="news" hidden>
+  <div class="container">
+    <div class="section-head center reveal">
+      <span class="eyebrow">Latest news</span>
+      <h2>From the <span class="gold-text">Zadix desk.</span></h2>
+    </div>
+    <div class="news-grid"></div>
   </div>
 </section>
 
@@ -260,7 +275,7 @@
 <section class="section">
   <div class="container">
     <div class="cta reveal zoom">
-      <img src="assets/images/cargo-ships.jpg" alt="" loading="lazy">
+      <img src="assets/images/cargo-ships.webp" alt="" loading="lazy" decoding="async">
       <div>
         <span class="eyebrow">Your vessel is on its way</span>
         <h2>Let your next port call be <span class="gold-text">effortless.</span></h2>
@@ -277,7 +292,7 @@
   <div class="container">
     <div class="footer-grid">
       <div>
-        <a href="index.html" class="footer-logo"><img src="assets/images/zadix-logo-gold.png" alt="Zadix Maritime"></a>
+        <a href="index.html" class="footer-logo"><img src="assets/images/zadix-logo-sm.webp" width="190" height="203" loading="lazy" decoding="async" alt="Zadix Maritime"></a>
         <p>A trusted ship supply partner across every Egyptian port and the Suez Canal, extending to Greece, Bulgaria, Romania and Turkey through our network of trusted partners.</p>
         <div class="socials">
           <a href="#" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
@@ -311,19 +326,20 @@
         <ul>
           <li><i class="fa-solid fa-location-dot" style="color:var(--gold);margin-right:10px"></i>Head Office, Egypt</li>
           <li><a href="tel:+201000000000"><i class="fa-solid fa-phone" style="color:var(--gold);margin-right:10px"></i>+20 100 000 0000</a></li>
-          <li><a href="mailto:info@zadixservices.com"><i class="fa-solid fa-envelope" style="color:var(--gold);margin-right:10px"></i>info@zadixservices.com</a></li>
+          <li><a href="mailto:zadix1maritime@gmail.com"><i class="fa-solid fa-envelope" style="color:var(--gold);margin-right:10px"></i>zadix1maritime@gmail.com</a></li>
           <li><i class="fa-solid fa-clock" style="color:var(--gold);margin-right:10px"></i>24 / 7 &middot; 365 days</li>
         </ul>
       </div>
     </div>
     <div class="footer-bottom">
-      <span>&copy; <span class="year"></span> Zadix Services. All rights reserved.</span>
+      <span>&copy; 2026 piXel. All rights reserved.</span>
       <span>Egypt &middot; Suez Canal &middot; Greece &middot; Bulgaria &middot; Romania &middot; Turkey</span>
     </div>
   </div>
 </footer>
 
 <button class="to-top" aria-label="Back to top"><i class="fa-solid fa-anchor"></i></button>
-<script src="js/main.js"></script>
+<script src="js/main.js" defer></script>
+<script type="module" src="js/live.js"></script>
 </body>
 </html>

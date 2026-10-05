@@ -1,0 +1,58 @@
+rules_version = '2';
+
+// Paste this whole file into: Firebase Console → Firestore Database → Rules → Publish.
+// Replace PASTE_ADMIN_UID with your admin user's UID (Authentication → Users → User UID).
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAdmin() {
+      return request.auth != null && request.auth.uid == "PASTE_ADMIN_UID";
+    }
+
+    function str(v, max) {
+      return v is string && v.size() <= max;
+    }
+
+    // Statistics shown on the home page
+    match /site/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // News: visitors can only read published articles
+    match /news/{id} {
+      allow read: if isAdmin() || resource.data.published == true;
+      allow write: if isAdmin();
+    }
+
+    // Visitor log: anyone can add one well-formed entry, only the admin can read it
+    match /visits/{id} {
+      allow create: if request.resource.data.keys().hasOnly(['page', 'ref', 'vid', 'isNew', 'device', 'lang', 'tz', 'ts'])
+        && str(request.resource.data.page, 60)
+        && str(request.resource.data.ref, 120)
+        && str(request.resource.data.vid, 40)
+        && request.resource.data.isNew is bool
+        && str(request.resource.data.device, 10)
+        && str(request.resource.data.lang, 10)
+        && str(request.resource.data.tz, 40)
+        && request.resource.data.ts == request.time;
+      allow read, delete: if isAdmin();
+    }
+
+    // Quote requests from the contact form
+    match /quotes/{id} {
+      allow create: if request.resource.data.keys().hasOnly(['name', 'company', 'email', 'phone', 'vessel', 'port', 'eta', 'message', 'status', 'createdAt'])
+        && str(request.resource.data.name, 120)
+        && str(request.resource.data.company, 160)
+        && str(request.resource.data.email, 160)
+        && str(request.resource.data.phone, 60)
+        && str(request.resource.data.vessel, 120)
+        && str(request.resource.data.port, 80)
+        && str(request.resource.data.eta, 80)
+        && str(request.resource.data.message, 4000)
+        && request.resource.data.status == 'new'
+        && request.resource.data.createdAt == request.time;
+      allow read, update, delete: if isAdmin();
+    }
+  }
+}
