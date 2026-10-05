@@ -69,10 +69,10 @@ async function start() {
   /* 4. Keep a copy of each quote request for the admin panel */
   document.addEventListener("zadix:quote", (e) => {
     const d = e.detail || {};
-    db.from("quotes").insert({
+    d.saved = db.from("quotes").insert({
       name: clip(d.name, 120), company: clip(d.company, 160), email: clip(d.email, 160), phone: clip(d.phone, 60),
       vessel: clip(d.vessel, 120), port: clip(d.port, 80), eta: clip(d.eta, 80), message: clip(d.message, 4000),
-    }).then(() => {});
+    }).then(({ error }) => !error, () => false);
   });
 }
 

@@ -274,7 +274,12 @@
       Vessel: d.vessel, Port: d.port, ETA: d.eta, Requirements: d.message,
       _replyto: d.email,
     };
-    document.dispatchEvent(new CustomEvent("zadix:quote", { detail: d })); // saved for the admin panel either way
+    // 1. Save to the admin panel (js/live.js attaches a promise to detail.saved)
+    const detail = { ...d };
+    document.dispatchEvent(new CustomEvent("zadix:quote", { detail }));
+    const saved = detail.saved || Promise.resolve(false);
+    // 2. Email it to the company inbox
+    let emailed = false;
     try {
       const res = await fetch(`https://formsubmit.co/ajax/${form.dataset.to}`, {
         method: "POST",
@@ -282,13 +287,20 @@
         body: JSON.stringify(payload),
       });
       const out = await res.json().catch(() => ({}));
-      if (!res.ok || String(out.success) === "false") throw new Error(out.message || "send failed");
-      note.textContent = "Thank you — your enquiry has been sent. Our team will reply shortly.";
-      form.reset();
+      emailed = res.ok && String(out.success) !== "false";
+    } catch {}
+    try {
+      // The request counts as received if it reached either the inbox or the admin panel
+      if (emailed || (await saved)) {
+        note.textContent = "Thank you — your enquiry has been sent. Our team will reply shortly.";
+        form.reset();
+      } else {
+        throw new Error("not delivered");
+      }
     } catch (err) {
       note.classList.add("error");
       const mail = form.dataset.contact || form.dataset.to;
-      note.innerHTML = `Sorry, we couldn't send that right now. Please email us at <a href="mailto:${mail}">${mail}</a>.`;
+      note.innerHTML = `Sorry, we couldn't send that right now. Please email us at <a href="mailto:${mail}">${mail}</a> or message us on WhatsApp.`;
     } finally {
       btn.disabled = false;
     }
