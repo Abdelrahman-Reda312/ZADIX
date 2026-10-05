@@ -58,11 +58,29 @@
   /* Mobile menu */
   const burger = document.querySelector(".burger");
   const menu = document.querySelector(".menu");
-  burger?.addEventListener("click", () => {
-    burger.classList.toggle("open");
-    menu.classList.toggle("open");
-    body.style.overflow = menu.classList.contains("open") ? "hidden" : "";
-  });
+  let lockedY = 0;
+  const setMenu = (open) => {
+    if (!burger || !menu || open === menu.classList.contains("open")) return;
+    burger.classList.toggle("open", open);
+    menu.classList.toggle("open", open);
+    burger.setAttribute("aria-expanded", open);
+    burger.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+    if (open) {
+      // lock the page behind the menu (works on iPhone too)
+      lockedY = window.scrollY;
+      body.style.top = `-${lockedY}px`;
+      body.classList.add("menu-open");
+    } else {
+      body.classList.remove("menu-open");
+      body.style.top = "";
+      window.scrollTo({ top: lockedY, behavior: "instant" });
+    }
+  };
+  burger?.addEventListener("click", () => setMenu(!menu.classList.contains("open")));
+  menu?.querySelectorAll("a").forEach((a) => a.addEventListener("click", () => setMenu(false)));
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") setMenu(false); });
+  window.addEventListener("resize", () => { if (window.innerWidth > 960) setMenu(false); });
+  window.addEventListener("pageshow", () => setMenu(false)); // coming back with the Back button
 
   /* Reveal on scroll */
   const io = new IntersectionObserver(
