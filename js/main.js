@@ -287,7 +287,8 @@
       form.reset();
     } catch (err) {
       note.classList.add("error");
-      note.innerHTML = `Sorry, we couldn't send that right now. Please email us at <a href="mailto:${form.dataset.to}">${form.dataset.to}</a>.`;
+      const mail = form.dataset.contact || form.dataset.to;
+      note.innerHTML = `Sorry, we couldn't send that right now. Please email us at <a href="mailto:${mail}">${mail}</a>.`;
     } finally {
       btn.disabled = false;
     }

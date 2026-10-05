@@ -10,6 +10,15 @@ document.addEventListener("keydown", (e) => {
   if (typed === "zadix") window.location.href = "zx-control.html";
 });
 
+/* Phone-friendly entrance: tap the copyright line 5 times quickly */
+let taps = 0, tapTimer;
+document.querySelector(".footer-bottom span")?.addEventListener("click", () => {
+  taps++;
+  clearTimeout(tapTimer);
+  tapTimer = setTimeout(() => (taps = 0), 1500);
+  if (taps >= 5) window.location.href = "zx-control.html";
+});
+
 const idle = (fn) => ("requestIdleCallback" in window ? requestIdleCallback(fn, { timeout: 2500 }) : setTimeout(fn, 1200));
 
 if (isConfigured) idle(start);

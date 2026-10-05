@@ -659,3 +659,83 @@ p { color: var(--muted); font-size: 1rem; }
 .cursor.on, .cursor-dot.on { opacity: 1; }
 @media (max-height: 980px) { .scroll-cue { display: none; } }
 @media (max-width: 640px) { .hero-content { padding: 130px 0 150px; } }
+
+/* ---------- Contact map button ---------- */
+.map-btn { position: absolute; left: 24px; bottom: 24px; z-index: 2; box-shadow: 0 14px 40px rgba(0,0,0,0.5); }
+
+/* ---------- Phone refinements ---------- */
+.route-hint { display: none; }
+@media (max-width: 640px) {
+  .section { padding: 72px 0; }
+  .section-head { margin-bottom: 40px; }
+  .eyebrow { letter-spacing: 0.26em; gap: 10px; }
+  .eyebrow::before, .section-head.center .eyebrow::after { width: 26px; }
+  .hero h1 { margin: 18px 0 22px; }
+  .hero p.lead { font-size: 1rem; }
+
+  /* Rings: compact 2 x 2 grid */
+  .rings { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .ring-card { padding: 26px 10px 22px; }
+  .ring { width: 112px; height: 112px; margin-bottom: 16px; }
+  .ring-center .num { font-size: 2rem; }
+  .ring-card h4 { font-size: 1.2rem; }
+  .ring-card p { font-size: 0.74rem; line-height: 1.5; }
+  .insight-panel { padding: 30px 20px; }
+  .donut-wrap { max-width: 240px; }
+  .donut-center span { font-size: 3rem; }
+
+  /* Image frames: smaller gold badge */
+  .frame::before { inset: 16px -16px -16px 16px; }
+  .frame { margin: 0 16px 16px 0; }
+  .frame .badge { left: 12px; bottom: 12px; padding: 14px 16px; max-width: 160px; }
+  .frame .badge strong { font-size: 2rem; }
+  .frame .badge span { font-size: 0.58rem; }
+
+  /* Buttons never wrap awkwardly */
+  .btn { white-space: nowrap; }
+  .cta { padding: 40px 22px; }
+  .cta .btn { width: 100%; justify-content: center; }
+
+  /* Ports route: scroll hint */
+  .route-hint { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 14px; font-size: 0.68rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); }
+  .route-hint i { animation: nudge 1.6s ease-in-out infinite; }
+  .region-title { margin: 50px 0 22px; }
+
+  /* Contact */
+  .map-wrap { height: 320px; margin-top: 60px; }
+  .map-btn { left: 50%; transform: translateX(-50%); bottom: 16px; }
+  .info-card { padding: 22px 0; gap: 16px; }
+  .info-card .ic { flex-basis: 48px; height: 48px; }
+  .form { padding: 30px 20px; }
+  .faq summary { font-size: 1.25rem; }
+
+  /* Footer: two-column link lists, no oversized watermark */
+  .footer { padding-top: 70px; }
+  .footer .big-word { display: none; }
+  .footer-grid { grid-template-columns: 1fr 1fr; gap: 36px 20px; }
+  .footer-grid > div:first-child, .footer-grid > div:last-child { grid-column: 1 / -1; }
+  .footer-bottom { margin-top: 50px; flex-direction: column; text-align: center; }
+  .footer ul a, .footer ul li { font-size: 0.88rem; }
+
+  .to-top { right: 16px; bottom: 16px; width: 46px; height: 46px; }
+}
+@keyframes nudge { 50% { transform: translateX(6px); } }
+
+/* ---------- WhatsApp & phone-menu quick actions ---------- */
+.menu-contact { display: none; }
+.wa-float {
+  position: fixed; left: 24px; bottom: 24px; z-index: 900;
+  width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--gold); color: var(--navy-950); font-size: 1.6rem;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.45); transition: transform 0.4s var(--ease), background 0.3s;
+}
+.wa-float::before { content: ""; position: absolute; inset: 0; border-radius: 50%; border: 1px solid var(--gold); animation: ripple 2.6s var(--ease) infinite; }
+.wa-float:hover { transform: scale(1.08); background: var(--gold-light); }
+@media (max-width: 960px) {
+  .menu-contact { display: flex; gap: 12px; margin-top: 20px; }
+  .menu-contact a { font-family: var(--sans); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; padding: 14px 20px; border: 1px solid var(--gold); color: var(--gold); display: inline-flex; gap: 10px; align-items: center; }
+  .menu-contact a::after { display: none; }
+}
+@media (max-width: 640px) {
+  .wa-float { left: 16px; bottom: 16px; width: 50px; height: 50px; font-size: 1.45rem; }
+}

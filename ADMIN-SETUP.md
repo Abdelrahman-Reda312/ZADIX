@@ -14,7 +14,8 @@ It runs on **Supabase** (project `xfzahrqzzqweaqshxvby`). The site is already co
 ## How to open the admin panel
 
 - Go to **`yoursite/zx-control.html`**. This page isn't linked anywhere on the site, or
-- type the word **`zadix`** on your keyboard while on any page of the site.
+- on a computer, type the word **`zadix`** on your keyboard while on any page of the site, or
+- on a phone, tap the **© 2026 piXel** line at the bottom of any page **5 times quickly**.
 
 ## 1. Create your admin login
 
