@@ -1,4 +1,4 @@
-# Zadix admin panel: one-time setup (about 10 minutes)
+# Zadix admin panel: setup (about 5 minutes)
 
 The admin panel lets you:
 
@@ -8,53 +8,51 @@ The admin panel lets you:
 - see who visits the site
 - see every quote request
 
-It runs on **Firebase**, Google's free backend. The site is static, so Firebase stores the data.
+It runs on **Supabase** (project `xfzahrqzzqweaqshxvby`). The site is already connected to it in
+`js/supabase-config.js`. You only need to do the three steps below once.
 
 ## How to open the admin panel
 
 - Go to **`yoursite/zx-control.html`**. This page isn't linked anywhere on the site, or
 - type the word **`zadix`** on your keyboard while on any page of the site.
 
-## 1. Create the Firebase project
+## 1. Create your admin login
 
-1. Go to https://console.firebase.google.com and sign in with **zadix1maritime@gmail.com**.
-2. Click **Add project**, name it `zadix`, and turn off Google Analytics. Click **Create**.
+1. Open https://supabase.com/dashboard and select your project.
+2. Go to **Authentication → Users → Add user → Create new user**.
+3. Enter **zadix1maritime@gmail.com** and a strong password.
+4. Tick **Auto Confirm User**, then click **Create user**.
 
-## 2. Connect the website
+## 2. Create the database
 
-1. On the project home page, click the **Web** icon `</>`. Name it `zadix-site` and click **Register app**.
-2. Firebase shows a `firebaseConfig = { ... }` block. Copy the six values into
-   **`js/firebase-config.js`**, replacing each `PASTE_...` placeholder.
+1. Go to **SQL Editor → New query**.
+2. Paste in the entire **`supabase-setup.sql`** file from this project and click **Run**.
+   It should say *Success. No rows returned*.
 
-## 3. Create your admin login
+This creates the tables and the security rules, and makes **zadix1maritime@gmail.com** the admin.
 
-1. In the left menu, go to **Build → Authentication → Get started**.
-2. Choose **Email/Password**, switch it **on**, and click **Save**.
-3. Open the **Users** tab and click **Add user**. Enter your admin email and a strong password.
-4. Copy the **User UID** shown in the users list. It's a long code like `aB3dE...`.
+To use a different admin email, change it on the last line of the SQL before running it.
+If you created the user *after* running the SQL, just run the file again; it's safe to re-run.
 
-## 4. Turn on the database and lock it
+## 3. Block strangers from signing up
 
-1. Go to **Build → Firestore Database → Create database**. Pick a location near Egypt
-   (for example `europe-west`), choose **production mode**, and click **Create**.
-2. Open the **Rules** tab and delete what's there.
-3. Paste in the entire **`firestore.rules`** file from this project.
-4. Replace `PASTE_ADMIN_UID` with the UID you copied in step 3, then click **Publish**.
+Go to **Authentication → Sign In / Providers** and turn **off** "Allow new users to sign up".
+Then save.
 
-Only that UID can then edit news and statistics or read visits and requests. Visitors can only read the
-public content and add their own visit or quote.
+The panel only lets in accounts listed as admin, so this is an extra lock.
 
-## 5. Allow your website's address
-
-Go to **Authentication → Settings → Authorized domains**, click **Add domain**, and enter your site's domain.
-For GitHub Pages that's `abdelrahman-reda312.github.io`.
-
-## 6. Publish
-
-Commit and push the updated `js/firebase-config.js`. Then open `zx-control.html` and sign in.
-On the first visit, save the **Statistics** tab once to store the starting numbers.
+That's it. Open `zx-control.html`, sign in, and you're in.
 
 ---
+
+## What's protected
+
+- **Visitors** can only read the statistics and *published* news, add their own visit, and send a quote request.
+- **Only your admin account** can edit news and statistics, or read the visitor log and the requests.
+
+These rules are enforced by the database itself (Row Level Security), not by the hidden link.
+The publishable key in `js/supabase-config.js` is designed to be public.
+**Never** put the `service_role` or *secret* key in the website.
 
 ## Quote requests in Gmail (FormSubmit)
 
@@ -65,7 +63,8 @@ The contact form sends every request to **zadix1maritime@gmail.com** through For
 - It only works on the published website (https), not when you open the HTML file from your computer.
 - If the requests don't show up, check Gmail's **Spam** and **Promotions** folders and mark them "Not spam".
 
-Each request is also saved in the admin panel under **Requests**, where you can mark it handled or reply.
+Every request is also saved in the admin panel under **Requests**, even if the email fails.
+There you can mark it handled or reply.
 
 ## Visitor tracking
 

@@ -1,11 +1,11 @@
-/* Zadix Control — admin dashboard (Firebase Auth + Firestore) */
-import { firebaseConfig, isConfigured, FIREBASE_BASE } from "./firebase-config.js";
+/* Zadix Control — admin dashboard (Supabase Auth + Database) */
+import { SUPABASE_URL, SUPABASE_KEY, SUPABASE_LIB, isConfigured } from "./supabase-config.js";
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const show = (id) => ["setup", "login", "app"].forEach((x) => ($("#" + x).hidden = x !== id));
 
-const DEFAULT_STATS = { ports: 13, countries: 5, hours: 24, days: 365, regions: { med: 3, canal: 5, red: 5 } };
+const DEFAULT_STATS = { ports: 13, countries: 5, hours: 24, days: 365, med: 3, canal: 5, red: 5 };
 const SITE_IMAGES = [
   "cargo-ships", "container-ship", "container-stack", "containers-port", "port-cranes", "port-2", "tanker",
   "ship-night", "ship-container", "warehouse", "forklift", "pallets-fruit", "fruit", "vegetables-2",
@@ -17,7 +17,7 @@ const toast = (text, bad = false) => {
   t.textContent = text;
   t.className = "toast show" + (bad ? " bad" : "");
   clearTimeout(t._h);
-  t._h = setTimeout(() => (t.className = "toast"), 2600);
+  t._h = setTimeout(() => (t.className = "toast"), 3200);
 };
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
@@ -28,38 +28,42 @@ if (!isConfigured) {
 }
 
 async function boot() {
-  const base = FIREBASE_BASE;
-  const [{ initializeApp }, A, F] = await Promise.all([
-    import(`${base}/firebase-app.js`),
-    import(`${base}/firebase-auth.js`),
-    import(`${base}/firebase-firestore.js`),
-  ]);
-  const app = initializeApp(firebaseConfig);
-  const auth = A.getAuth(app);
-  const db = F.getFirestore(app);
-  const { collection, doc, getDoc, getDocs, setDoc, addDoc, updateDoc, deleteDoc, query, where, orderBy, limit, serverTimestamp, Timestamp } = F;
+  const { createClient } = await import(SUPABASE_LIB);
+  const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+  const must = ({ data, error }) => { if (error) throw error; return data; };
+  const denied = (err) => toast("Could not complete that: " + (err?.message || err), true);
 
   /* ---------- Auth ---------- */
-  A.onAuthStateChanged(auth, (user) => {
-    if (!user) { show("login"); return; }
+  let started = false;
+  const enter = async (session) => {
+    if (!session) { started = false; show("login"); return; }
+    // Only accounts listed in the admins table may use the panel
+    const { data: admin } = await sb.from("admins").select("user_id").eq("user_id", session.user.id).maybeSingle();
+    if (!admin) {
+      $("#loginMsg").textContent = "This account is not an admin.";
+      await sb.auth.signOut();
+      return;
+    }
+    if (started) return;
+    started = true;
     try { localStorage.setItem("zx_admin", "1"); } catch {}
-    $("#who").textContent = user.email;
+    $("#who").textContent = session.user.email;
     show("app");
     loadVisits(); loadQuotes(); loadNews(); loadStats();
+  };
+  sb.auth.onAuthStateChange((event, session) => {
+    // run outside the auth callback, as Supabase recommends
+    if (["INITIAL_SESSION", "SIGNED_IN", "SIGNED_OUT"].includes(event)) setTimeout(() => enter(session), 0);
   });
 
   $("#loginForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const f = new FormData(e.target);
     $("#loginMsg").textContent = "Signing in…";
-    try {
-      await A.signInWithEmailAndPassword(auth, f.get("email"), f.get("password"));
-      $("#loginMsg").textContent = "";
-    } catch (err) {
-      $("#loginMsg").textContent = "Wrong email or password.";
-    }
+    const { error } = await sb.auth.signInWithPassword({ email: f.get("email"), password: f.get("password") });
+    $("#loginMsg").textContent = error ? "Wrong email or password." : "";
   });
-  $("#logout").addEventListener("click", () => A.signOut(auth));
+  $("#logout").addEventListener("click", () => sb.auth.signOut());
 
   /* ---------- Tabs ---------- */
   $$(".tabs button").forEach((b) => b.addEventListener("click", () => {
@@ -67,17 +71,19 @@ async function boot() {
     $$(".panel").forEach((p) => (p.hidden = p.dataset.panel !== b.dataset.tab));
   }));
 
-  const denied = (err) => {
-    if (String(err?.code).includes("permission")) toast("This account is not the admin (check firestore.rules UID).", true);
-    else toast("Could not load data: " + (err?.message || err), true);
-  };
-
   /* ---------- Visitors ---------- */
   async function loadVisits() {
     try {
-      const since = Timestamp.fromDate(new Date(Date.now() - 30 * 864e5));
-      const qs = await getDocs(query(collection(db, "visits"), where("ts", ">=", since), orderBy("ts", "desc"), limit(5000)));
-      renderVisits(qs.docs.map((d) => ({ ...d.data(), ts: d.data().ts?.toDate?.() || new Date() })));
+      const since = new Date(Date.now() - 30 * 864e5).toISOString();
+      const rows = [];
+      // The API returns at most 1000 rows per request, so read in pages
+      for (let from = 0; from < 20000; from += 1000) {
+        const page = must(await sb.from("visits").select("page,ref,vid,is_new,device,tz,ts")
+          .gte("ts", since).order("ts", { ascending: false }).range(from, from + 999));
+        rows.push(...page);
+        if (page.length < 1000) break;
+      }
+      renderVisits(rows.map((r) => ({ ...r, isNew: r.is_new, ts: new Date(r.ts) })));
     } catch (err) { denied(err); }
   }
   $("#refreshVisits").addEventListener("click", loadVisits);
@@ -165,8 +171,7 @@ async function boot() {
   /* ---------- Quote requests ---------- */
   async function loadQuotes() {
     try {
-      const qs = await getDocs(query(collection(db, "quotes"), orderBy("createdAt", "desc"), limit(200)));
-      const items = qs.docs.map((d) => ({ id: d.id, ...d.data() }));
+      const items = must(await sb.from("quotes").select("*").order("created_at", { ascending: false }).limit(200));
       const fresh = items.filter((q) => q.status === "new").length;
       $("#newQuotes").hidden = !fresh;
       $("#newQuotes").textContent = fresh;
@@ -174,7 +179,7 @@ async function boot() {
         <article class="quote ${q.status === "new" ? "is-new" : ""}" data-id="${q.id}">
           <header>
             <div><h4>${esc(q.name)} ${q.company ? `<small>· ${esc(q.company)}</small>` : ""}</h4>
-            <time>${q.createdAt?.toDate ? q.createdAt.toDate().toLocaleString("en-GB") : ""}</time></div>
+            <time>${q.created_at ? new Date(q.created_at).toLocaleString("en-GB") : ""}</time></div>
             <span class="tag ${q.status === "new" ? "" : "done"}">${q.status === "new" ? "New" : "Handled"}</span>
           </header>
           <dl>
@@ -197,12 +202,14 @@ async function boot() {
     const b = e.target.closest("button[data-act]");
     if (!b) return;
     const card = b.closest(".quote"), id = card.dataset.id;
-    if (b.dataset.act === "toggle") {
-      await updateDoc(doc(db, "quotes", id), { status: card.classList.contains("is-new") ? "handled" : "new" });
-    } else if (confirm("Delete this request permanently?")) {
-      await deleteDoc(doc(db, "quotes", id));
-    } else return;
-    loadQuotes();
+    try {
+      if (b.dataset.act === "toggle") {
+        must(await sb.from("quotes").update({ status: card.classList.contains("is-new") ? "handled" : "new" }).eq("id", id));
+      } else if (confirm("Delete this request permanently?")) {
+        must(await sb.from("quotes").delete().eq("id", id));
+      } else return;
+      loadQuotes();
+    } catch (err) { denied(err); }
   });
 
   /* ---------- News ---------- */
@@ -233,10 +240,10 @@ async function boot() {
   nf.addEventListener("submit", async (e) => {
     e.preventDefault();
     const image = nf.imagePick.value === "__url" ? nf.imageUrl.value.trim() : nf.imagePick.value;
-    const data = { title: nf.title.value.trim(), date: nf.date.value, body: nf.body.value.trim(), image, published: nf.published.checked, updatedAt: serverTimestamp() };
+    const data = { title: nf.title.value.trim(), date: nf.date.value, body: nf.body.value.trim(), image, published: nf.published.checked, updated_at: new Date().toISOString() };
     try {
-      if (nf.id.value) await updateDoc(doc(db, "news", nf.id.value), data);
-      else await addDoc(collection(db, "news"), { ...data, createdAt: serverTimestamp() });
+      if (nf.id.value) must(await sb.from("news").update(data).eq("id", nf.id.value));
+      else must(await sb.from("news").insert(data));
       nf.hidden = true;
       toast("News saved");
       loadNews();
@@ -246,8 +253,7 @@ async function boot() {
   let newsCache = [];
   async function loadNews() {
     try {
-      const qs = await getDocs(query(collection(db, "news"), orderBy("date", "desc"), limit(100)));
-      newsCache = qs.docs.map((d) => ({ id: d.id, ...d.data() }));
+      newsCache = must(await sb.from("news").select("*").order("date", { ascending: false }).limit(100));
       $("#newsList").innerHTML = newsCache.map((n) => `
         <article class="news-item" data-id="${n.id}">
           ${n.image ? `<img src="${esc(n.image)}" alt="">` : `<div class="noimg"><i class="fa-solid fa-newspaper"></i></div>`}
@@ -272,8 +278,8 @@ async function boot() {
     const n = newsCache.find((x) => x.id === id);
     if (b.dataset.act === "edit") return openNews(n);
     try {
-      if (b.dataset.act === "pub") await updateDoc(doc(db, "news", id), { published: !n.published });
-      else if (confirm(`Delete “${n.title}”?`)) await deleteDoc(doc(db, "news", id));
+      if (b.dataset.act === "pub") must(await sb.from("news").update({ published: !n.published }).eq("id", id));
+      else if (confirm(`Delete “${n.title}”?`)) must(await sb.from("news").delete().eq("id", id));
       else return;
       loadNews();
     } catch (err) { denied(err); }
@@ -283,21 +289,20 @@ async function boot() {
   const sf = $("#statsForm");
   async function loadStats() {
     try {
-      const snap = await getDoc(doc(db, "site", "stats"));
-      const s = snap.exists() ? { ...DEFAULT_STATS, ...snap.data() } : DEFAULT_STATS;
-      ["ports", "countries", "hours", "days"].forEach((k) => (sf[k].value = s[k]));
-      ["med", "canal", "red"].forEach((k) => (sf[k].value = s.regions?.[k] ?? DEFAULT_STATS.regions[k]));
+      const row = must(await sb.from("site_stats").select("*").eq("id", 1).maybeSingle());
+      ["ports", "countries", "hours", "days", "med", "canal", "red"].forEach((k) => (sf[k].value = row?.[k] ?? DEFAULT_STATS[k]));
     } catch (err) { denied(err); }
   }
   sf.addEventListener("submit", async (e) => {
     e.preventDefault();
     const n = (k) => Number(sf[k].value);
     try {
-      await setDoc(doc(db, "site", "stats"), {
+      const saved = must(await sb.from("site_stats").update({
         ports: n("ports"), countries: n("countries"), hours: n("hours"), days: n("days"),
-        regions: { med: n("med"), canal: n("canal"), red: n("red") },
-        updatedAt: serverTimestamp(),
-      });
+        med: n("med"), canal: n("canal"), red: n("red"),
+        updated_at: new Date().toISOString(),
+      }).eq("id", 1).select("id"));
+      if (!saved?.length) throw new Error("the statistics row is missing — re-run supabase-setup.sql");
       toast("Statistics saved — live on the home page");
     } catch (err) { denied(err); }
   });

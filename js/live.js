@@ -1,6 +1,6 @@
 /* Live content for the public site: statistics, news, visit counter, quote archive.
-   Loads after the page is interactive and does nothing until Firebase is configured. */
-import { firebaseConfig, isConfigured, FIREBASE_BASE } from "./firebase-config.js";
+   Loads after the page is interactive and does nothing until Supabase is configured. */
+import { SUPABASE_URL, SUPABASE_KEY, SUPABASE_LIB, isConfigured } from "./supabase-config.js";
 
 /* Hidden admin entrance: type "zadix" anywhere on the site (outside form fields) */
 let typed = "";
@@ -15,17 +15,13 @@ const idle = (fn) => ("requestIdleCallback" in window ? requestIdleCallback(fn, 
 if (isConfigured) idle(start);
 
 async function start() {
-  const base = FIREBASE_BASE;
-  const [{ initializeApp }, fs] = await Promise.all([
-    import(`${base}/firebase-app.js`),
-    import(`${base}/firebase-firestore-lite.js`),
-  ]);
-  const { getFirestore, doc, getDoc, collection, getDocs, addDoc, query, where, limit, serverTimestamp } = fs;
-  const db = getFirestore(initializeApp(firebaseConfig));
+  const { createClient } = await import(SUPABASE_LIB);
+  const db = createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: false, autoRefreshToken: false } });
+  const clip = (v, n) => String(v || "").slice(0, n);
 
   /* 1. Visit counter (skipped for the admin's own browser) */
   try {
-    let isAdmin = false, vid = null, isNew = false;
+    let isAdmin = false, vid = "anon", isNew = false;
     try {
       isAdmin = localStorage.getItem("zx_admin") === "1";
       vid = localStorage.getItem("zx_vid");
@@ -36,46 +32,38 @@ async function start() {
       let ref = "";
       try { ref = document.referrer ? new URL(document.referrer).hostname : ""; } catch {}
       if (ref === location.hostname) ref = "";
-      addDoc(collection(db, "visits"), {
-        page: location.pathname.split("/").pop() || "index.html",
-        ref,
-        vid,
-        isNew,
+      db.from("visits").insert({
+        page: clip(location.pathname.split("/").pop() || "index.html", 60),
+        ref: clip(ref, 120),
+        vid: clip(vid, 40),
+        is_new: isNew,
         device: w < 700 ? "Mobile" : w < 1100 ? "Tablet" : "Desktop",
-        lang: (navigator.language || "").slice(0, 10),
-        tz: (Intl.DateTimeFormat().resolvedOptions().timeZone || "").slice(0, 40),
-        ts: serverTimestamp(),
-      }).catch(() => {});
+        lang: clip(navigator.language, 10),
+        tz: clip(Intl.DateTimeFormat().resolvedOptions().timeZone, 40),
+      }).then(() => {});
     }
   } catch {}
 
   /* 2. Statistics edited in the admin panel */
   if (document.querySelector(".insights")) {
-    try {
-      const snap = await getDoc(doc(db, "site", "stats"));
-      if (snap.exists()) applyStats(snap.data());
-    } catch {}
+    const { data } = await db.from("site_stats").select("*").eq("id", 1).maybeSingle();
+    if (data) applyStats({ ...data, regions: { med: data.med, canal: data.canal, red: data.red } });
   }
 
   /* 3. News */
   const newsSec = document.querySelector("#news");
   if (newsSec) {
-    try {
-      const qs = await getDocs(query(collection(db, "news"), where("published", "==", true), limit(30)));
-      const items = qs.docs.map((d) => d.data()).sort((a, b) => String(b.date).localeCompare(String(a.date))).slice(0, 3);
-      if (items.length) renderNews(newsSec, items);
-    } catch {}
+    const { data } = await db.from("news").select("title,date,body,image").eq("published", true).order("date", { ascending: false }).limit(3);
+    if (data?.length) renderNews(newsSec, data);
   }
 
   /* 4. Keep a copy of each quote request for the admin panel */
   document.addEventListener("zadix:quote", (e) => {
     const d = e.detail || {};
-    const clip = (v, n) => String(v || "").slice(0, n);
-    addDoc(collection(db, "quotes"), {
+    db.from("quotes").insert({
       name: clip(d.name, 120), company: clip(d.company, 160), email: clip(d.email, 160), phone: clip(d.phone, 60),
       vessel: clip(d.vessel, 120), port: clip(d.port, 80), eta: clip(d.eta, 80), message: clip(d.message, 4000),
-      status: "new", createdAt: serverTimestamp(),
-    }).catch(() => {});
+    }).then(() => {});
   });
 }
 

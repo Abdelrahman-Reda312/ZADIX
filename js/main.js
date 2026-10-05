@@ -274,6 +274,7 @@
       Vessel: d.vessel, Port: d.port, ETA: d.eta, Requirements: d.message,
       _replyto: d.email,
     };
+    document.dispatchEvent(new CustomEvent("zadix:quote", { detail: d })); // saved for the admin panel either way
     try {
       const res = await fetch(`https://formsubmit.co/ajax/${form.dataset.to}`, {
         method: "POST",
@@ -282,7 +283,6 @@
       });
       const out = await res.json().catch(() => ({}));
       if (!res.ok || String(out.success) === "false") throw new Error(out.message || "send failed");
-      document.dispatchEvent(new CustomEvent("zadix:quote", { detail: d }));
       note.textContent = "Thank you — your enquiry has been sent. Our team will reply shortly.";
       form.reset();
     } catch (err) {
