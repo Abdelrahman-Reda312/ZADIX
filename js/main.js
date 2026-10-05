@@ -78,6 +78,88 @@
   }, { threshold: 0.6 });
   document.querySelectorAll("[data-count]").forEach((el) => countIO.observe(el));
 
+  /* Segmented gold rings (one segment per port / country / hour / month) */
+  const NS = "http://www.w3.org/2000/svg";
+  document.querySelectorAll(".ring[data-segments]").forEach((ring, idx) => {
+    const n = +ring.dataset.segments;
+    const r = 76, C = 2 * Math.PI * r, gap = n > 12 ? 10 : 12;
+    const svg = document.createElementNS(NS, "svg");
+    svg.setAttribute("viewBox", "0 0 170 170");
+    svg.innerHTML = `<defs><linearGradient id="goldGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#9a7a3a"/><stop offset="0.5" stop-color="#f1dca4"/><stop offset="1" stop-color="#c9a45c"/></linearGradient></defs>
+      <circle class="inner" cx="85" cy="85" r="62"/>`;
+    for (let i = 0; i < n; i++) {
+      const c = document.createElementNS(NS, "circle");
+      c.setAttribute("class", "seg");
+      c.setAttribute("cx", 85); c.setAttribute("cy", 85); c.setAttribute("r", r);
+      c.setAttribute("stroke-dasharray", `${C / n - gap} ${C}`);
+      c.setAttribute("stroke-dashoffset", -(i * C) / n);
+      c.style.transitionDelay = `${i * (1400 / n)}ms`;
+      svg.appendChild(c);
+    }
+    ring.prepend(svg);
+  });
+  const ringIO = new IntersectionObserver((entries) => entries.forEach((en) => {
+    if (en.isIntersecting) { en.target.classList.add("on"); ringIO.unobserve(en.target); }
+  }), { threshold: 0.5 });
+  document.querySelectorAll(".ring").forEach((r) => ringIO.observe(r));
+
+  /* Region donut + bars (linked hover) */
+  const panel = document.querySelector(".insight-panel");
+  if (panel) {
+    const donut = panel.querySelector(".donut");
+    const tip = panel.querySelector(".chart-tip");
+    const rows = [...panel.querySelectorAll(".bars li")];
+    const total = rows.reduce((s, li) => s + +li.dataset.value, 0);
+    const max = Math.max(...rows.map((li) => +li.dataset.value));
+    const r = 80, C = 2 * Math.PI * r, gap = 2.5;
+    let acc = 0;
+    const arcs = rows.map((li) => {
+      const v = +li.dataset.value;
+      const len = (v / total) * C;
+      const arc = document.createElementNS(NS, "circle");
+      arc.setAttribute("class", "arc");
+      arc.setAttribute("cx", 100); arc.setAttribute("cy", 100); arc.setAttribute("r", r);
+      arc.setAttribute("stroke", li.dataset.color);
+      arc.setAttribute("stroke-dasharray", `0 ${C}`);
+      arc.setAttribute("stroke-dashoffset", -acc);
+      arc.dataset.len = len - gap;
+      arc._mid = ((acc + len / 2) / C) * 2 * Math.PI - Math.PI / 2;
+      acc += len;
+      donut.appendChild(arc);
+      return arc;
+    });
+
+    const focus = (i, on) => {
+      arcs.forEach((a, j) => { a.classList.toggle("dim", on && j !== i); a.classList.toggle("hot", on && j === i); });
+      rows.forEach((li, j) => li.classList.toggle("dim", on && j !== i));
+      if (on) {
+        const li = rows[i], v = +li.dataset.value, a = arcs[i];
+        const pct = Math.round((v / total) * 100);
+        tip.innerHTML = `<b>${li.dataset.region}</b> · ${v} of ${total} (${pct}%)`;
+        tip.style.left = 50 + Math.cos(a._mid) * 40 + "%";
+        tip.style.top = 50 + Math.sin(a._mid) * 40 + "%";
+      }
+      tip.classList.toggle("show", on);
+    };
+    arcs.forEach((a, i) => {
+      a.addEventListener("mouseenter", () => focus(i, true));
+      a.addEventListener("mouseleave", () => focus(i, false));
+    });
+    rows.forEach((li, i) => {
+      li.addEventListener("mouseenter", () => focus(i, true));
+      li.addEventListener("mouseleave", () => focus(i, false));
+    });
+
+    const panelIO = new IntersectionObserver((entries) => {
+      if (!entries[0].isIntersecting) return;
+      arcs.forEach((a, i) => setTimeout(() => a.setAttribute("stroke-dasharray", `${a.dataset.len} ${C}`), i * 250));
+      rows.forEach((li) => (li.querySelector(".bar-fill").style.width = (+li.dataset.value / max) * 100 + "%"));
+      panelIO.disconnect();
+    }, { threshold: 0.4 });
+    panelIO.observe(panel);
+  }
+
   /* Custom cursor */
   const cursor = document.querySelector(".cursor");
   const dot = document.querySelector(".cursor-dot");
