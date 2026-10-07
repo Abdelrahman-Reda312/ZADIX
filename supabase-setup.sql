@@ -12,7 +12,7 @@ create table if not exists public.admins (
 create table if not exists public.site_stats (
   id         int primary key default 1 check (id = 1),   -- single row
   ports      int not null default 13,
-  countries  int not null default 5,
+  countries  int not null default 2,
   hours      int not null default 24,
   days       int not null default 365,
   med        int not null default 3,

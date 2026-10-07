@@ -229,6 +229,82 @@
     observeReveal,
   };
 
+  /* Leadership cards: gold spotlight follows the pointer */
+  document.querySelectorAll(".leader").forEach((card) => {
+    card.addEventListener("pointermove", (e) => {
+      const r = card.getBoundingClientRect();
+      card.style.setProperty("--mx", `${e.clientX - r.left}px`);
+      card.style.setProperty("--my", `${e.clientY - r.top}px`);
+    });
+  });
+
+  /* Lightbox for office photos: <figure data-lightbox="group"> with an <img> inside */
+  const shots = [...document.querySelectorAll("[data-lightbox]")];
+  if (shots.length) {
+    const lb = document.createElement("div");
+    lb.className = "lightbox";
+    lb.setAttribute("role", "dialog");
+    lb.setAttribute("aria-modal", "true");
+    lb.setAttribute("aria-label", "Photo viewer");
+    lb.innerHTML = `<span class="lb-count"></span><figure><img alt=""><figcaption></figcaption></figure>
+      <button class="lb-close" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+      <button class="lb-prev" aria-label="Previous photo"><i class="fa-solid fa-arrow-left"></i></button>
+      <button class="lb-next" aria-label="Next photo"><i class="fa-solid fa-arrow-right"></i></button>`;
+    body.appendChild(lb);
+    const img = lb.querySelector("img"), cap = lb.querySelector("figcaption"), count = lb.querySelector(".lb-count");
+    let group = [], idx = 0, opener = null;
+    const show = (i) => {
+      idx = (i + group.length) % group.length;
+      const fig = group[idx], src = fig.querySelector("img");
+      img.src = src.currentSrc || src.src;
+      img.alt = src.alt;
+      cap.innerHTML = fig.querySelector("figcaption")?.innerHTML.replace(/<i[^>]*><\/i>/g, "") || "";
+      count.textContent = `${String(idx + 1).padStart(2, "0")} / ${String(group.length).padStart(2, "0")}`;
+    };
+    const open = (fig) => {
+      group = shots.filter((s) => s.dataset.lightbox === fig.dataset.lightbox);
+      lb.classList.toggle("single", group.length < 2);
+      opener = fig;
+      show(group.indexOf(fig));
+      lb.classList.add("open");
+      lb.querySelector(".lb-close").focus();
+    };
+    const close = () => { lb.classList.remove("open"); opener?.focus(); };
+    shots.forEach((fig) => {
+      fig.tabIndex = 0;
+      fig.setAttribute("role", "button");
+      fig.addEventListener("click", () => open(fig));
+      fig.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(fig); } });
+    });
+    lb.querySelector(".lb-close").addEventListener("click", close);
+    lb.querySelector(".lb-prev").addEventListener("click", () => show(idx - 1));
+    lb.querySelector(".lb-next").addEventListener("click", () => show(idx + 1));
+    lb.addEventListener("click", (e) => { if (e.target === lb) close(); });
+    document.addEventListener("keydown", (e) => {
+      if (!lb.classList.contains("open")) return;
+      if (e.key === "Escape") close();
+      if (e.key === "ArrowLeft") show(idx - 1);
+      if (e.key === "ArrowRight") show(idx + 1);
+    });
+    let sx = 0;
+    lb.addEventListener("touchstart", (e) => (sx = e.touches[0].clientX), { passive: true });
+    lb.addEventListener("touchend", (e) => {
+      const dx = e.changedTouches[0].clientX - sx;
+      if (Math.abs(dx) > 50 && group.length > 1) show(idx + (dx < 0 ? 1 : -1));
+    });
+  }
+
+  /* Contact page: switch the map between our offices */
+  const officeTabs = document.querySelectorAll(".office-tab");
+  const officeMap = document.querySelector(".map-wrap iframe");
+  const mapBtn = document.querySelector(".map-btn");
+  officeTabs.forEach((tab) => tab.addEventListener("click", (e) => {
+    if (e.target.closest("a")) return; // phone / WhatsApp links work normally
+    officeTabs.forEach((t) => { t.classList.toggle("active", t === tab); t.querySelector(".view")?.setAttribute("aria-pressed", t === tab); });
+    if (officeMap) { officeMap.src = tab.dataset.map; officeMap.title = tab.dataset.title; }
+    if (mapBtn) mapBtn.href = tab.dataset.directions;
+  }));
+
   /* Custom cursor — runs only while the mouse is moving */
   const cursor = document.querySelector(".cursor");
   const dot = document.querySelector(".cursor-dot");
@@ -247,7 +323,7 @@
       if (!running) { running = true; requestAnimationFrame(loop); }
     }, { passive: true });
     document.addEventListener("mouseover", (e) => {
-      cursor.classList.toggle("hover", !!e.target.closest("a, button, .card, .product, .g, summary, .news-card"));
+      cursor.classList.toggle("hover", !!e.target.closest("a, button, .card, .product, .g, summary, .news-card, .shot"));
     });
   }
 

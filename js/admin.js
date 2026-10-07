@@ -5,7 +5,7 @@ const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const show = (id) => ["setup", "login", "app"].forEach((x) => ($("#" + x).hidden = x !== id));
 
-const DEFAULT_STATS = { ports: 13, countries: 5, hours: 24, days: 365, med: 3, canal: 5, red: 5 };
+const DEFAULT_STATS = { ports: 13, countries: 2, hours: 24, days: 365, med: 3, canal: 5, red: 5 };
 const SITE_IMAGES = [
   "cargo-ships", "container-ship", "container-stack", "containers-port", "port-cranes", "port-2", "tanker",
   "ship-night", "ship-container", "warehouse", "forklift", "pallets-fruit", "fruit", "vegetables-2",
