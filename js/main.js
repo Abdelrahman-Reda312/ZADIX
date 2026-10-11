@@ -13,7 +13,7 @@
 
   /* Page wipe transition between internal pages */
   const wipe = document.querySelector(".page-wipe");
-  document.querySelectorAll('a[href$=".html"]').forEach((a) => {
+  document.querySelectorAll('a[href$=".html"], a[href^="/"]:not([href^="//"])').forEach((a) => {
     a.addEventListener("click", (e) => {
       if (e.metaKey || e.ctrlKey || a.target === "_blank") return;
       e.preventDefault();
