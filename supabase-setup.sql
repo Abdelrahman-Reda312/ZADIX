@@ -113,3 +113,34 @@ grant execute on function public.is_admin() to anon, authenticated;
 insert into public.admins (user_id)
 select id from auth.users where email = 'zadix1maritime@gmail.com'
 on conflict do nothing;
+
+-- ============================================================
+-- Quote attachments — files clients upload with a quote request
+-- Paste/run this in Supabase → SQL Editor. Safe to run more than once.
+-- ============================================================
+
+-- 1. Record uploaded files on each quote (array of {name, path, size, type})
+alter table public.quotes
+  add column if not exists attachments jsonb not null default '[]'::jsonb;
+
+-- 2. Private storage bucket for the files (10 MB per file)
+insert into storage.buckets (id, name, public, file_size_limit)
+values ('quote-files', 'quote-files', false, 10485760)
+on conflict (id) do update set public = false, file_size_limit = 10485760;
+
+-- 3. Access rules: anyone may upload a file; only admins may read or delete
+drop policy if exists "quote files public upload" on storage.objects;
+drop policy if exists "quote files admin read"    on storage.objects;
+drop policy if exists "quote files admin delete"  on storage.objects;
+
+create policy "quote files public upload" on storage.objects
+  for insert to anon, authenticated
+  with check (bucket_id = 'quote-files');
+
+create policy "quote files admin read" on storage.objects
+  for select to authenticated
+  using (bucket_id = 'quote-files' and public.is_admin());
+
+create policy "quote files admin delete" on storage.objects
+  for delete to authenticated
+  using (bucket_id = 'quote-files' and public.is_admin());

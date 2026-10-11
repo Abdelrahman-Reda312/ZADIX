@@ -66,13 +66,31 @@ async function start() {
     if (data?.length) renderNews(newsSec, data);
   }
 
-  /* 4. Keep a copy of each quote request for the admin panel */
+  /* 4. Keep a copy of each quote request for the admin panel — text plus any files */
   document.addEventListener("zadix:quote", (e) => {
     const d = e.detail || {};
-    d.saved = db.from("quotes").insert({
-      name: clip(d.name, 120), company: clip(d.company, 160), email: clip(d.email, 160), phone: clip(d.phone, 60),
-      vessel: clip(d.vessel, 120), port: clip(d.port, 80), eta: clip(d.eta, 80), message: clip(d.message, 4000),
-    }).then(({ error }) => !error, () => false);
+    d.saved = (async () => {
+      // Upload any attachments to the private "quote-files" bucket first
+      const attachments = [];
+      for (const f of d.files || []) {
+        try {
+          const safe = (f.name || "file").replace(/[^\w.\-]+/g, "_").slice(-80);
+          const path = `${crypto.randomUUID()}/${safe}`;
+          const { error } = await db.storage.from("quote-files").upload(path, f, {
+            contentType: f.type || "application/octet-stream", upsert: false,
+          });
+          if (!error) attachments.push({ name: clip(f.name, 160), path, size: f.size, type: clip(f.type, 120) });
+        } catch {}
+      }
+      const base = {
+        name: clip(d.name, 120), company: clip(d.company, 160), email: clip(d.email, 160), phone: clip(d.phone, 60),
+        vessel: clip(d.vessel, 120), port: clip(d.port, 80), eta: clip(d.eta, 80), message: clip(d.message, 4000),
+      };
+      let { error } = await db.from("quotes").insert({ ...base, attachments });
+      // If the attachments column isn't there yet (migration not run), still save the text
+      if (error) ({ error } = await db.from("quotes").insert(base));
+      return !error;
+    })();
   });
 }
 

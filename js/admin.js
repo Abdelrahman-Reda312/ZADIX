@@ -189,6 +189,7 @@ async function boot() {
             <div><dt>Phone</dt><dd>${esc(q.phone) || "—"}</dd></div>
           </dl>
           <p>${esc(q.message)}</p>
+          ${(q.attachments || []).length ? `<div class="files">${q.attachments.map((a) => `<button class="btn sm ghost" data-file="${esc(a.path)}" title="${esc(a.name)}"><i class="fa-solid fa-paperclip"></i>${esc(a.name)}</button>`).join("")}</div>` : ""}
           <footer>
             <a class="btn sm" href="mailto:${esc(q.email)}?subject=${encodeURIComponent("Re: your quote request — " + (q.vessel || "Zadix"))}"><i class="fa-solid fa-reply"></i>Reply</a>
             <button class="btn sm ghost" data-act="toggle">${q.status === "new" ? "Mark handled" : "Mark new"}</button>
@@ -199,6 +200,16 @@ async function boot() {
   }
   $("#refreshQuotes").addEventListener("click", loadQuotes);
   $("#quoteList").addEventListener("click", async (e) => {
+    // Download an attachment via a short-lived signed URL (bucket is private)
+    const fileBtn = e.target.closest("button[data-file]");
+    if (fileBtn) {
+      try {
+        const { data, error } = await sb.storage.from("quote-files").createSignedUrl(fileBtn.dataset.file, 120);
+        if (error) throw error;
+        window.open(data.signedUrl, "_blank", "noopener");
+      } catch (err) { denied(err); }
+      return;
+    }
     const b = e.target.closest("button[data-act]");
     if (!b) return;
     const card = b.closest(".quote"), id = card.dataset.id;

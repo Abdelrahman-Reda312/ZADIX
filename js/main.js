@@ -351,43 +351,74 @@
 
   /* Quote form → delivered to the company Gmail via FormSubmit (and saved for the admin panel) */
   const form = document.querySelector("#enquiry");
+  const fileInput = form?.querySelector('input[type="file"]');
+  const MAX_UPLOAD = 10 * 1024 * 1024; // FormSubmit attachment limit (10 MB total)
+
+  // Show the names of attached files under the upload field
+  fileInput?.addEventListener("change", () => {
+    const names = form.querySelector(".file-names");
+    if (!names) return;
+    const list = Array.from(fileInput.files).map((f) => f.name);
+    names.textContent = list.join(", ");
+  });
+
   form?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const note = form.querySelector(".form-note");
     const btn = form.querySelector('button[type="submit"]');
-    const d = Object.fromEntries(new FormData(form));
-    if (d._honey) return; // bot
-    delete d._honey;
+    const fd = new FormData(form);
+    if (fd.get("_honey")) return; // bot
+    fd.delete("_honey");
+
+    // Keep total attachment size within FormSubmit's 10 MB limit
+    let totalSize = 0;
+    for (const f of fileInput?.files || []) totalSize += f.size;
+    if (totalSize > MAX_UPLOAD) {
+      note.classList.add("error");
+      note.textContent = "Your attachment is over 10 MB. Please send a smaller file, or email it to us directly.";
+      return;
+    }
+
+    // Plain text fields — used for the subject line and the admin panel copy
+    const d = {};
+    fd.forEach((v, k) => { if (typeof v === "string") d[k] = v; });
+
     btn.disabled = true;
     note.classList.remove("error");
     note.textContent = "Sending your enquiry…";
-    const payload = {
-      _subject: `New quote request — ${d.vessel || "Vessel"} @ ${d.port || "Port"}`,
-      _template: "table",
-      Name: d.name, Company: d.company, Email: d.email, Phone: d.phone,
-      Vessel: d.vessel, Port: d.port, ETA: d.eta, Requirements: d.message,
-      _replyto: d.email,
-    };
-    // 1. Save to the admin panel (js/live.js attaches a promise to detail.saved)
-    const detail = { ...d };
+
+    // FormSubmit control fields
+    fd.append("_subject", `New quote request — ${d.vessel || "Vessel"} @ ${d.port || "Port"}`);
+    fd.append("_template", "table");
+    fd.append("_captcha", "false");
+    fd.append("_replyto", d.email || "");
+
+    // 1. Save a copy to the admin panel — text fields plus any attached files
+    //    (js/live.js uploads the files to storage and attaches a promise to detail.saved)
+    const detail = { ...d, files: Array.from(fileInput?.files || []) };
     document.dispatchEvent(new CustomEvent("zadix:quote", { detail }));
     const saved = detail.saved || Promise.resolve(false);
-    // 2. Email it to the company inbox
+
+    // 2. Email it — with any attachment — to the company inbox via FormSubmit.
+    //    Send multipart/form-data (do NOT set Content-Type; the browser adds the boundary).
     let emailed = false;
     try {
       const res = await fetch(`https://formsubmit.co/ajax/${form.dataset.to}`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify(payload),
+        headers: { Accept: "application/json" },
+        body: fd,
       });
       const out = await res.json().catch(() => ({}));
       emailed = res.ok && String(out.success) !== "false";
     } catch {}
+
     try {
       // The request counts as received if it reached either the inbox or the admin panel
       if (emailed || (await saved)) {
         note.textContent = "Thank you — your enquiry has been sent. Our team will reply shortly.";
         form.reset();
+        const names = form.querySelector(".file-names");
+        if (names) names.textContent = "";
       } else {
         throw new Error("not delivered");
       }

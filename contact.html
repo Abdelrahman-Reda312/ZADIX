@@ -104,7 +104,7 @@
       <div class="info-card"><div class="ic"><i class="fa-solid fa-building"></i></div><div><small>Branch office &middot; UAE</small><h4>Abu Dhabi</h4><p>Office #16, 11th Floor, Dar Al Salam Building,<br>Liwa Street, Abu Dhabi, UAE</p><a href="https://wa.me/971588711569" target="_blank" rel="noopener"><i class="fa-brands fa-whatsapp"></i> +971 58 871 1569</a></div></div>
     </div>
 
-    <form class="form reveal right" id="enquiry" data-to="zadix1maritime@gmail.com" data-contact="info@zadix-maritime.com">
+    <form class="form reveal right" id="enquiry" enctype="multipart/form-data" data-to="zadix1maritime@gmail.com" data-contact="info@zadix-maritime.com">
       <h3>Request a Quotation</h3>
       <p>Share your vessel details and requirements — we'll reply with a complete quote.</p>
       <div class="form-row">
@@ -124,6 +124,12 @@
         <label for="port">Port of Call</label><span class="line"></span>
       </div>
       <div class="field"><textarea id="message" name="message" placeholder=" " required></textarea><label for="message">Your Requirements</label><span class="line"></span></div>
+      <div class="field-file">
+        <input type="file" id="attachment" name="attachment" multiple accept=".pdf,.xls,.xlsx,.csv,.doc,.docx,.jpg,.jpeg,.png,.webp,.gif">
+        <label for="attachment" class="file-label"><i class="fa-solid fa-paperclip"></i> Attach a requisition — Excel, Word, PDF or image</label>
+        <span class="file-names" aria-live="polite"></span>
+        <span class="file-hint">Optional &middot; up to 10&nbsp;MB in total</span>
+      </div>
       <input type="text" name="_honey" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px" aria-hidden="true">
       <button type="submit" class="btn">Send Enquiry <i class="fa-solid fa-paper-plane"></i></button>
       <div class="form-note"></div>
@@ -207,6 +213,7 @@
           <li><a href="https://www.bing.com/maps?ss=ypid.YNC512009C8F6FD7CC" target="_blank" rel="noopener"><i class="fa-solid fa-location-dot" style="color:var(--gold);margin-right:10px"></i>Head Office, Cairo, Egypt</a></li>
           <li><a href="/ports#abu-dhabi"><i class="fa-solid fa-building" style="color:var(--gold);margin-right:10px"></i>Branch Office, Abu Dhabi, UAE</a></li>
           <li><a href="tel:+201000740804"><i class="fa-solid fa-phone" style="color:var(--gold);margin-right:10px"></i>+20 100 074 0804</a></li>
+          <li><a href="tel:+201063063007"><i class="fa-solid fa-phone" style="color:var(--gold);margin-right:10px"></i>+20 10 6306 3007</a></li>
           <li><a href="https://wa.me/201000740804" target="_blank" rel="noopener"><i class="fa-brands fa-whatsapp" style="color:var(--gold);margin-right:10px"></i>WhatsApp</a></li>
           <li><a href="https://wa.me/971588711569" target="_blank" rel="noopener"><i class="fa-brands fa-whatsapp" style="color:var(--gold);margin-right:10px"></i>+971 58 871 1569 (UAE)</a></li>
           <li><a href="mailto:info@zadix-maritime.com"><i class="fa-solid fa-envelope" style="color:var(--gold);margin-right:10px"></i>info@zadix-maritime.com</a></li>

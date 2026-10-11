@@ -915,3 +915,34 @@ body.menu-open { position: fixed; left: 0; right: 0; overflow: hidden; }
   .office-tab { padding: 26px 22px; }
   .office-tab .view { position: static; margin-top: 18px; }
 }
+
+/* ============================================================
+   SEO / feature additions
+   ============================================================ */
+
+/* Brand line inside the hero heading (keeps the hero sentence unchanged) */
+.hero h1 .h1-brand {
+  display: block; font-family: "Montserrat", sans-serif;
+  font-size: 0.78rem; font-weight: 600; letter-spacing: 0.34em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 16px;
+}
+@media (max-width: 600px) { .hero h1 .h1-brand { font-size: 0.68rem; letter-spacing: 0.26em; } }
+
+/* "What is Zadix" brief facts row */
+.checks.checks-inline { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px 34px; margin-top: 0; }
+.checks.checks-inline li { align-items: center; }
+.checks.checks-inline li i { margin-top: 0; }
+
+/* File attachment field in the quote form */
+.field-file { margin-bottom: 26px; }
+.field-file input[type="file"] { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; }
+.field-file .file-label {
+  display: flex; align-items: center; gap: 12px; cursor: pointer; width: 100%;
+  padding: 16px 18px; background: transparent; border: 1px dashed rgba(244, 239, 228, 0.25);
+  color: var(--muted); font-size: 0.82rem; letter-spacing: 0.04em; transition: 0.4s var(--ease);
+}
+.field-file .file-label i { color: var(--gold); font-size: 0.95rem; }
+.field-file:hover .file-label,
+.field-file input[type="file"]:focus-visible + .file-label { border-color: var(--gold); color: var(--ivory); }
+.field-file .file-names { display: block; margin-top: 10px; font-size: 0.78rem; color: var(--gold); min-height: 1em; }
+.field-file .file-hint { display: block; margin-top: 6px; font-size: 0.7rem; color: var(--muted); letter-spacing: 0.02em; }

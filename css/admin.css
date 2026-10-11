@@ -157,3 +157,7 @@ h3.sub { font-size: 1.3rem; margin: 6px 0 16px; color: var(--gold); }
   .news-item img, .news-item .noimg { width: 100%; height: 160px; }
   .ni-actions { flex-direction: row; flex-wrap: wrap; }
 }
+
+/* Quote attachments */
+.quote .files { display: flex; flex-wrap: wrap; gap: 8px; margin: 2px 0 6px; }
+.quote .files .btn { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
