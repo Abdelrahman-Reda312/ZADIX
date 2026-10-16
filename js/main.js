@@ -262,7 +262,8 @@
       count.textContent = `${String(idx + 1).padStart(2, "0")} / ${String(group.length).padStart(2, "0")}`;
     };
     const open = (fig) => {
-      group = shots.filter((s) => s.dataset.lightbox === fig.dataset.lightbox);
+      group = shots.filter((s) => s.dataset.lightbox === fig.dataset.lightbox && !s.closest("[hidden]"));
+      if (!group.includes(fig)) group.unshift(fig);
       lb.classList.toggle("single", group.length < 2);
       opener = fig;
       show(group.indexOf(fig));
@@ -293,6 +294,24 @@
       if (Math.abs(dx) > 50 && group.length > 1) show(idx + (dx < 0 ? 1 : -1));
     });
   }
+
+  /* Gallery page: filter the field photos by category */
+  const filterBtns = document.querySelectorAll(".filters button");
+  const tiles = document.querySelectorAll(".masonry .tile");
+  filterBtns.forEach((btn) => {
+    const cat = btn.dataset.filter;
+    const n = cat === "all" ? tiles.length : [...tiles].filter((t) => t.dataset.cat.split(" ").includes(cat)).length;
+    btn.insertAdjacentHTML("beforeend", `<sup>${String(n).padStart(2, "0")}</sup>`);
+    btn.addEventListener("click", () => {
+      filterBtns.forEach((b) => { b.classList.toggle("active", b === btn); b.setAttribute("aria-pressed", b === btn); });
+      tiles.forEach((t) => {
+        const show = cat === "all" || t.dataset.cat.split(" ").includes(cat);
+        t.hidden = !show;
+        t.classList.remove("pop");
+        if (show) { t.classList.add("in"); void t.offsetWidth; t.classList.add("pop"); }
+      });
+    });
+  });
 
   /* Contact page: switch the map between our offices */
   const officeTabs = document.querySelectorAll(".office-tab");
